@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<style>
+*{
+	margin:0;
+	padding:0;
+}
+body{
+	background-color: black;
+	text-align: center;
+}
+#canvas{
+	background-color: white;
+}
+</style>
+<head>
+	<meta charset="UTF-8">
+	<title>Canvas</title>
+</head>
+<body>
+	<canvas id="canvas" width="800" height="600">
+		你的浏览器版本过低，请尽快升级。
+	</canvas>
+<script>
+function rnd(n,m){
+	return Math.floor(Math.random()*(m-n)+n);
+}
+function d2a(n){
+	return n*Math.PI/180;
+}
+function toDou(iNum){
+	return iNum<10?'0'+iNum:''+iNum;
+}
+</script>
+<script src="pixel.js"></script>
+</body>
+</html>
