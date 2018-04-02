@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>canvas</title>
+    <script type="text/javascript" src="https://cdn.bootcss.com/jquery/3.3.1/jquery.js"></script>
+    <style type="text/css">
+        #canvas{
+            /*//width: 7rem;*/
+            /*margin: .25rem 0 0 1.5rem;*/
+            border: 1px solid black;
+            display: block;
+            background-color: white;
+        }
+    </style>
+</head>
+<body style="background-color: black">
+<canvas id="canvas" width="1000px" height="600px">你的浏览器版本过低，请尽快升级。</canvas>
+</body>
+</html>
+<script type="text/javascript">
+  // 首先强调isPointInPath(x,y)方法是针对路径的，比如canvas中的rect、arc方法都可以用，
+  // 但是fillRect不可以用，因为它不是路径；而且仅对当前的路径有效，而且如果当前路径有多个子路径
+  // （currentPath可以有多个subPath：比如进行了rect()之后，再进行arc()，最后关闭路径，进行stroke，
+  // 那么rect()和arc()所绘制的就是当前路径的两个子路径），只对第一个子路径有效。in the current path：
+  // 如下图所示，图中路径是由rect方法形成的，in the path 包括path边
+  //
+  // 2.鉴于isPointInPath()不支持canvas自带的两个方法fillRect(),strokeRect();
+  //
+  // 可以用如下方法替代：
+  //
+  // ctx.rect(x,y,w,h);
+  // ctx.stroke(); //替代strokeRect();
+  //
+  // ctx.rect(x,y,w,h);
+  // ctx.fill(); //替代fillRect();
+
+  /**
+   * rem 布局初始化
+   */
+  $('html').css('font-size', $(window).width()/10);
+  /**
+   * 获取 canvas 画布
+   * 获取 canvas 绘图上下文环境
+   */
+  var canvas = $('#canvas')[0];
+  var cxt = canvas.getContext('2d');
+  var ballss = [];
+  var timer = null;
+
+  /**
+   * 事件交互, 点击事件为例
+   * isPointInPath(横坐标, 纵坐标)
+   */
+  var col = canvas.width / 100;
+  var row = canvas.height / 100;
+  addBall();
+
+  //draw();
+  clearInterval(timer);
+  timer = setInterval(function(){
+  	//判断第一行超出
+		checkTop(ballss[0]);
+		checkBottom(ballss.length-1);
+  	play();
+  }, 100);
+
+  $("#canvas").click(function(){
+    //标准的获取鼠标点击相对于canvas画布的坐标公式
+    var x = event.pageX - canvas.getBoundingClientRect().left;
+    var y = event.pageY - canvas.getBoundingClientRect().top;
+    
+    for(var i = 0; i < ballss.length; i++){
+    	for(var j = 0; j < ballss[i].length; j++){
+    		cxt.beginPath();
+	      cxt.arc(ballss[i][j].X, ballss[i][j].Y, (ballss[i][j].W + ballss[i][j].H)/2, 0, Math.PI*2);
+	      //cxt.rect(ballss[i][j].X, ballss[i][j].Y, ballss[i][j].W, ballss[i][j].H);
+	      if(cxt.isPointInPath(x, y)){
+	        ballss[i][j].color = 'red';
+	        draw(ballss[i][j]);
+	      }
+    	}
+    }
+  });
+
+  function draw(ball){
+  	cxt.save();
+    cxt.beginPath();
+    //cxt.arc(balls[i].X, balls[i].Y, balls[i].R, 0, Math.PI*2);
+    cxt.translate(ball.X+ball.W/2,ball.Y+ball.H/2);
+    cxt.rotate(d2a(ball.r));
+    cxt.rect(-ball.W/2, -ball.H/2, ball.W, ball.H);
+    cxt.fillStyle = ball.color;
+    cxt.fill();
+    cxt.restore();
+  }
+
+  function addBall(){
+  	var balls = [];
+  	for(var i = 0; i < col/2; i++){
+	    var ball = {
+	      X: Math.random()*100 + 200*i,
+	      Y: Math.random()*30 - 60,
+	      R: Math.random()*10 + 40,
+	      W: Math.floor(Math.random()*10+40),
+	      H: Math.floor(Math.random()*10+40),
+	      color: 'blue',
+	      //旋转弧度
+	      r: 0
+	    }
+	    balls[i] = ball;
+	  }
+	  ballss.unshift(balls);
+  }
+
+  function checkTop(balls){
+  	var isTimeCount = 0;
+  	for(var i = 0; i < balls.length; i++){
+	    if(balls[i].Y >= 50){
+	    	isTimeCount ++;
+	    }
+	  }
+	  if(isTimeCount > 0){
+	  	addBall();
+	  }
+  }
+
+  function checkBottom(balls){
+  	var isTimeCount = 0;
+  	for(var i = 0; i < balls.length; i++){
+	    if(balls[i].Y >= canvas.height){
+	    	isTimeCount ++;
+	    }
+	  }
+	  if(isTimeCount == balls.length){
+	  	ballss.pop();
+	  }
+  }
+
+  function play(){
+  	cxt.clearRect( 0, 0, canvas.width, canvas.height);
+  	for(var i = 0; i < ballss.length; i++){
+    	for(var j = 0; j < ballss[i].length; j++){
+    		var ball = ballss[i][j];
+    		if(!!ball){
+    			if( ball.r < 360 ){
+		    		ball.r += 10;
+		    	}else{
+		    		ball.r = 0;
+		    	}
+		    	ball.Y += (Math.random()*5 + 15);
+		    	draw(ball);
+    		}
+    	}
+    }
+  }
+
+  function d2a(n){
+		return n*Math.PI/180;
+	}
+	function rnd(n,m){
+		return Math.floor(Math.random()*(m-n)+n);
+	}
+</script>

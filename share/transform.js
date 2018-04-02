@@ -28,7 +28,7 @@ gd.restore();
 
 // gd.restore();
 
-gd.beginPath();
+//gd.beginPath();
 gd.fillStyle = 'rgba(0,0,0,0.3)';
 gd.fillRect(0,0,canvas.width,canvas.height);
 
